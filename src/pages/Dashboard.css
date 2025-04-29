@@ -1,0 +1,28 @@
+/* Dashboard.css */
+
+.dashboardContainer {
+    padding: 32px;
+  }
+  
+  .dashboardTitle {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .filterCard {
+    margin-bottom: 32px;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .buttonGroup {
+    margin-top: 16px;
+  }
+  
+  .stackSpacing {
+    gap: 16px;
+  }
+  
