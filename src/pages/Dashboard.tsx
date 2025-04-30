@@ -1,4 +1,3 @@
-// Dashboard.tsx
 import React, { useState, Suspense } from 'react';
 import { useVulnerabilityData } from '../hooks/useVulnerabilityData';
 import { VulnerabilityTable } from '../components/VulnerabilityTable';
@@ -13,8 +12,10 @@ import {
   Select,
   Stack,
   TextField,
-  Typography
+  Typography,
+  Autocomplete
 } from '@mui/material';
+import { useSnackbar } from '../context/SnackbarContext';
 import './Dashboard.css';
 
 const SeverityChart = React.lazy(() => import('../components/SeverityChart'));
@@ -31,7 +32,7 @@ function extractAllVulnerabilities(data: any) {
       for (const imageKey in repo.images) {
         const image = repo.images[imageKey];
         if (Array.isArray(image.vulnerabilities)) {
-          const enrichedVulns = image.vulnerabilities.map((vuln: any, index: number) => {
+          const enrichedVulns = image.vulnerabilities.map((vuln: any) => {
             const derivedKaiStatus = vuln.kaiStatus?.toLowerCase() || '';
             return {
               ...vuln,
@@ -52,6 +53,7 @@ function Dashboard() {
   const [severityFilter, setSeverityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [kaiFilter, setKaiFilter] = useState('');
+  const { showMessage } = useSnackbar();
 
   if (isLoading) return <div>Loading vulnerability data...</div>;
   if (error) return <div>Error loading data: {(error as Error).message}</div>;
@@ -93,16 +95,15 @@ function Dashboard() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showMessage('CSV exported successfully!', 'success');
   }
 
   function handleClearFilters() {
     setKaiFilter('');
     setSearchTerm('');
     setSeverityFilter('');
+    showMessage('All filters cleared', 'info');
   }
-
-  console.log('kaiFilter is:', kaiFilter);
-  console.log('Filtered rows count:', filteredVulnerabilities.length);
 
   return (
     <Box className="dashboardContainer">
@@ -127,13 +128,21 @@ function Dashboard() {
                 <MenuItem value="low">Low</MenuItem>
               </Select>
             </FormControl>
-            <TextField
-              label="Search CVE ID"
-              variant="outlined"
-              size="small"
-              fullWidth
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+
+            <Autocomplete
+              freeSolo
+              options={[...new Set(vulnerabilities.map((v) => v.cve))]}
+              inputValue={searchTerm}
+              onInputChange={(e, value) => setSearchTerm(value)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search CVE ID"
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                />
+              )}
             />
           </Stack>
 
